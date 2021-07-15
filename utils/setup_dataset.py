@@ -1,6 +1,6 @@
 # TODO: Potentially add license.
 # pylint: disable=unexpected-keyword-arg
-""" Create tf.data.Dataset from generator"""
+""" Create tf.data.Dataset from generator """
 
 import tensorflow as tf
 import tensorflow_addons as tfa

@@ -1,6 +1,6 @@
 # TODO: Potentially add license.
 # pylint: disable=no-member
-""" Generator to extract data from .csv file."""
+""" Generator to extract data from .csv file. """
 
 import joblib
 import imageio
