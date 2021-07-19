@@ -274,4 +274,4 @@ class CombinedDataGen(utils.Sequence):
             return self._get_image(batch)
 
         if self.out_mode == 'meta':
-            return self._get_combined(batch)
+            return self._get_meta(batch)
