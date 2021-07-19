@@ -140,15 +140,16 @@ def _cutout(im):
 
 
 @tf.function
-def _image_augment(im):
+def _image_augment(raw_inp):
     """ Passes input through augmentation pipeline for model training.
     
     Args:
         im: tf.Tensor.
             3D tensor of single example.
 
-    Returns: Scaled and augmented 3D image tensor .  
+    Returns: Scaled and augmented 3D image tensor.  
     """
+    im = raw_inp[0]['img_0']
     im = _image_scale(im)
 
     # gaussian blur
@@ -186,6 +187,24 @@ def _image_augment(im):
     im = tf.image.random_crop(im, size=(224, 224))
 
     return im
+
+
+def _process_aug(inp):
+    im = inp[0]['img_0']
+    im = _image_augment(im)
+
+    inp[0]['img_0'] = im
+
+    return inp
+
+
+def _process(inp):
+    im = inp[0]['img_0']
+    im = _center_crop(im)
+
+    inp[0]['img_0'] = im
+
+    return inp
 
 
 def get_ds_from_gen(generator,
@@ -244,11 +263,21 @@ def get_ds_from_gen(generator,
 
     # can customize to optimize performance for your system (see: https://www.tensorflow.org/guide/data_performance)
     prefetch_sample_num = 10 * batch_size
+
     if mode == 'train':
-        ds = ds.cache(filename=cache_dir).prefetch(prefetch_sample_num).map(
-            _image_augment, num_parallel_calls=TF_AUTO).batch(batch_size)
+        if out_mode == 'meta':
+            ds = ds.cache(filename=cache_dir).prefetch(
+                prefetch_sample_num).batch(batch_size)
+        else:
+            ds = ds.cache(
+                filename=cache_dir).prefetch(prefetch_sample_num).map(
+                    _process_aug, num_parallel_calls=TF_AUTO).batch(batch_size)
     else:
-        ds = ds.prefetch(prefetch_sample_num).batch(batch_size).map(
-            _center_crop).map(_image_scale)
+        if out_mode == 'meta':
+            ds = ds.prefetch(prefetch_sample_num).batch(batch_size).map(
+                _image_scale)
+        else:
+            ds = ds.prefetch(prefetch_sample_num).batch(batch_size).map(
+                _process).map(_image_scale)
 
     return ds
