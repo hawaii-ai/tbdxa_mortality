@@ -66,8 +66,8 @@ def _center_crop(im):
     im = tf.image.crop_to_bounding_box(im,
                                        offset_height=VERT_CENTER - OFFSET,
                                        offset_width=HORIZ_CENTER - OFFSET,
-                                       target_height=VERT_CENTER + OFFSET,
-                                       target_width=HORIZ_CENTER + OFFSET)
+                                       target_height=2 * OFFSET,
+                                       target_width=2 * OFFSET)
 
     return im
 
@@ -102,22 +102,27 @@ def _cutout_helper(im):
     Returns: 3D image tensor with patch of image zeroed out.  
     """
     # cutout patch can cover max 1/3 of original image
-    MX_HEIGHT = 638
-    MX_WIDTH = 218
+    MX_HEIGHT = 319  # 638/2
+    MX_WIDTH = 109  # 218
 
     mask_height = tf.random.uniform([],
-                                    minval=10,
+                                    minval=6,
                                     maxval=MX_HEIGHT,
                                     dtype=tf.dtypes.int32)
 
     mask_width = tf.random.uniform([],
-                                   minval=5,
+                                   minval=2,
                                    maxval=MX_WIDTH,
                                    dtype=tf.dtypes.int32)
+    
+    # must be even numbers
+    mask_height = mask_height * 2
+    mask_width = mask_width * 2
 
     return tfa.image.cutout(im, mask_size=(mask_height, mask_width))
 
 
+@tf.function
 def _cutout(im):
     """ Applies cutout (arxiv: 1708.04552) to images. Randomly creates up to 3 patches.
     
@@ -127,20 +132,27 @@ def _cutout(im):
 
     Returns: 3D image tensor with patch(es) of image zeroed out.  
     """
+    # add pseudo batch axis for tfa.cutout
+    orig_shape = tf.shape(im)
+    im = tf.expand_dims(im, axis=0)
+    
     # Tensorflow has no native for-loop, this can probably be re-written more elegantly though
-    tmp = tf.random.uniform([], minval=0, maxval=2, dtype=tf.dtypes.int8)
-
+    tmp = tf.random.uniform([], minval=0, maxval=2, dtype=tf.dtypes.int32)
+    
     im = _cutout_helper(im)
     if tmp > 0:
         im = _cutout_helper(im)
     if tmp > 1:
         im = _cutout_helper(im)
-
+    
+    # remove pseudo batch axis
+    im = tf.reshape(im, shape=orig_shape)
+    
     return im
 
 
 @tf.function
-def _image_augment(raw_inp):
+def _image_augment(im):
     """ Passes input through augmentation pipeline for model training.
     
     Args:
@@ -149,7 +161,6 @@ def _image_augment(raw_inp):
 
     Returns: Scaled and augmented 3D image tensor.  
     """
-    im = raw_inp[0]['img_0']
     im = _image_scale(im)
 
     # gaussian blur
@@ -158,7 +169,7 @@ def _image_augment(raw_inp):
                                     maxval=5,
                                     dtype=tf.dtypes.int32)
     gb_kwargs = {
-        'filter_shape': kernel_size,
+        'filter_shape': (kernel_size, kernel_size),
     }
     im = _random_apply(tfa.image.gaussian_filter2d,
                        im,
@@ -184,27 +195,28 @@ def _image_augment(raw_inp):
     im = _random_apply(_cutout, im, p=AUG_PROBABILITY)
 
     # random crop
-    im = tf.image.random_crop(im, size=(224, 224))
+    im = tf.image.random_crop(im, size=(224, 224, 2))
 
     return im
 
 
-def _process_aug(inp):
-    im = inp[0]['img_0']
+def _process_aug(inp, lbl):
+    im = inp['img_0']
     im = _image_augment(im)
 
-    inp[0]['img_0'] = im
+    inp['img_0'] = im
 
-    return inp
+    return inp, lbl
 
 
-def _process(inp):
-    im = inp[0]['img_0']
+def _process(inp, lbl):
+    im = inp['img_0']
+    im = _image_scale(im)
     im = _center_crop(im)
 
-    inp[0]['img_0'] = im
+    inp['img_0'] = im
 
-    return inp
+    return inp, lbl
 
 
 def get_ds_from_gen(generator,
@@ -239,7 +251,7 @@ def get_ds_from_gen(generator,
                                                 'meta_0': tf.float32
                                             }, tf.float32),
                                             output_shapes=({
-                                                'img_0': (224, 224, 2),
+                                                'img_0': (1914, 654, 2),
                                                 'meta_0': (22)
                                             }, (1)))
 
@@ -258,7 +270,7 @@ def get_ds_from_gen(generator,
                                                 'img_0': tf.float32
                                             }, tf.float32),
                                             output_shapes=({
-                                                'img_0': (224, 224, 2)
+                                                'img_0': (1914, 654, 2)
                                             }, (1)))
 
     # can customize to optimize performance for your system (see: https://www.tensorflow.org/guide/data_performance)
@@ -271,13 +283,11 @@ def get_ds_from_gen(generator,
         else:
             ds = ds.cache(
                 filename=cache_dir).prefetch(prefetch_sample_num).map(
-                    _process_aug, num_parallel_calls=TF_AUTO).batch(batch_size)
+                    _process_aug, num_parallel_calls=TF_AUTO).batch(batch_size).prefetch(5)
     else:
         if out_mode == 'meta':
-            ds = ds.prefetch(prefetch_sample_num).batch(batch_size).map(
-                _image_scale)
+            ds = ds.prefetch(prefetch_sample_num).batch(batch_size)
         else:
-            ds = ds.prefetch(prefetch_sample_num).batch(batch_size).map(
-                _process).map(_image_scale)
+            ds = ds.prefetch(prefetch_sample_num).batch(batch_size).map(_process).prefetch(5)
 
     return ds
