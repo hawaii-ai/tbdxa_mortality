@@ -100,3 +100,36 @@ def init_combined_model(densenet_weights='imagenet', weights=None):
         nn_mdl.load_weights(weights, by_name=True)
 
     return nn_mdl
+
+def init_seq_model(weights, inp_shape=65):
+    """Creates sequence model.
+    
+    Args:
+        weights: Filename.
+            Deafult is None. 
+            If provided, function will attempt to initialize model weights from this file.
+            Layer names in the weights file need to match exactly. 
+            Otherwise weights will be initialized randomly.
+        inp_shape: Int.
+            Shape of input vector. For different modality single-record models, it is their
+            penultimate layer's output shape + 1. 
+
+    Returns: Uncompiled tf.keras.models.Model instance.      
+    """
+    inp = Input(shape=(None, inp_shape), name='img_0')
+
+    x = Masking(mask_value=-1)(inp)
+    x = LSTM(units=8, name='lstm_1')(x)
+    x = Dense(units=64, activation='selu', name='dense1')(x)
+    x = Dense(units=64, activation='selu', name='dense2')(x)
+    x = Dense(units=64, activation='selu', name='dense3')(x)
+    x = Dense(units=64, activation='selu', name='dense4')(x)
+    x = Dropout(0.5, name='dropout')(x)
+    out = Dense(units=1, activation='sigmoid', name='out')(x)
+    
+    nn_mdl = Model(inputs=[inp], outputs=[out])
+    if weights:
+        nn_mdl.load_weights(weights, by_name=True)
+    
+    return nn_mdl
+    

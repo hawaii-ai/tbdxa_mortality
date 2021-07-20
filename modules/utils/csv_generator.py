@@ -30,6 +30,8 @@ class CombinedDataGen(utils.Sequence):
         batch_size: Int. 
             Default is 1. Whether datapoints are returned in batches (batch_size>1) or individually (default).
             If used in conjunction with tf.data.Dataset.from_generator, batch_size = 1 is recommended. 
+        include_index: Boolean.
+            Default is False. Can be used to map entries back into source dataframe.
 
     Raises:
         AssertionError: If invalid arguments are provided for 'mode' or 'out_mode'.
@@ -40,10 +42,12 @@ class CombinedDataGen(utils.Sequence):
                  mode='test',
                  shuffle=True,
                  scaler_dir='./models/scalers/',
-                 batch_size=1):
+                 batch_size=1,
+                 include_index=False):
         self.shuffle = shuffle
         self.batch_size = batch_size
         self.scaler_dir = scaler_dir
+        self.include_index = include_index
 
         assert mode in ['train', 'valid', 'test']
         self.mode = mode
@@ -268,10 +272,16 @@ class CombinedDataGen(utils.Sequence):
         batch = self.df.copy().loc[batch_idx, :]
 
         if self.out_mode == 'combined':
+            if self.include_index:
+                return self._get_combined(batch), batch_idx
             return self._get_combined(batch)
 
         if self.out_mode == 'image':
+            if self.include_index:
+                return self._get_image(batch), batch_idx
             return self._get_image(batch)
 
         if self.out_mode == 'meta':
+            if self.include_index:
+                return self._get_meta(batch), batch_idx
             return self._get_meta(batch)
