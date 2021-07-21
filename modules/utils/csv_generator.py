@@ -10,7 +10,6 @@ from sklearn import preprocessing
 from tensorflow.keras import utils
 
 
-# TODO: Errors noticed: not scaling grip strength, not incluiiding current age as out column
 class CombinedDataGen(utils.Sequence):
     """ Generate batches of paired x:y numpy arrays from csv source. 
     

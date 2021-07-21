@@ -114,7 +114,7 @@ def _cutout_helper(im):
                                    minval=2,
                                    maxval=MX_WIDTH,
                                    dtype=tf.dtypes.int32)
-    
+
     # must be even numbers
     mask_height = mask_height * 2
     mask_width = mask_width * 2
@@ -135,19 +135,19 @@ def _cutout(im):
     # add pseudo batch axis for tfa.cutout
     orig_shape = tf.shape(im)
     im = tf.expand_dims(im, axis=0)
-    
+
     # Tensorflow has no native for-loop, this can probably be re-written more elegantly though
     tmp = tf.random.uniform([], minval=0, maxval=2, dtype=tf.dtypes.int32)
-    
+
     im = _cutout_helper(im)
     if tmp > 0:
         im = _cutout_helper(im)
     if tmp > 1:
         im = _cutout_helper(im)
-    
+
     # remove pseudo batch axis
     im = tf.reshape(im, shape=orig_shape)
-    
+
     return im
 
 
@@ -200,6 +200,7 @@ def _image_augment(im):
     return im
 
 
+@tf.function
 def _process_aug(inp, lbl):
     im = inp['img_0']
     im = _image_augment(im)
@@ -209,6 +210,7 @@ def _process_aug(inp, lbl):
     return inp, lbl
 
 
+@tf.function
 def _process(inp, lbl):
     im = inp['img_0']
     im = _image_scale(im)
@@ -219,6 +221,7 @@ def _process(inp, lbl):
     return inp, lbl
 
 
+@tf.function
 def get_ds_from_gen(generator,
                     out_mode='combined',
                     mode='test',
@@ -283,11 +286,13 @@ def get_ds_from_gen(generator,
         else:
             ds = ds.cache(
                 filename=cache_dir).prefetch(prefetch_sample_num).map(
-                    _process_aug, num_parallel_calls=TF_AUTO).batch(batch_size).prefetch(5)
+                    _process_aug,
+                    num_parallel_calls=TF_AUTO).batch(batch_size).prefetch(5)
     else:
         if out_mode == 'meta':
             ds = ds.prefetch(prefetch_sample_num).batch(batch_size)
         else:
-            ds = ds.prefetch(prefetch_sample_num).batch(batch_size).map(_process).prefetch(5)
+            ds = ds.prefetch(prefetch_sample_num).batch(batch_size).map(
+                _process).prefetch(5)
 
     return ds
