@@ -200,7 +200,6 @@ def _image_augment(im):
     return im
 
 
-@tf.function
 def _process_aug(inp, lbl):
     im = inp['img_0']
     im = _image_augment(im)
@@ -210,7 +209,6 @@ def _process_aug(inp, lbl):
     return inp, lbl
 
 
-@tf.function
 def _process(inp, lbl):
     im = inp['img_0']
     im = _image_scale(im)
@@ -221,7 +219,6 @@ def _process(inp, lbl):
     return inp, lbl
 
 
-@tf.function
 def get_ds_from_gen(generator,
                     out_mode='combined',
                     mode='test',

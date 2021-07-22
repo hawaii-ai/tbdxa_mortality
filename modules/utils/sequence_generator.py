@@ -5,9 +5,8 @@ import datetime
 from tensorflow.keras.utils import Sequence
 
 
-class ImageSequenceGen(Sequence):
+class SequenceGen(Sequence):
     def __init__(self, data_file, batch_size, drop_prob=0.1, emb_shape=65):
-        # 1024dim filler for image-only, 65dim filler for metadata+image, 23dim for metadata only
         self.FILLER = np.array(
             [-1] * emb_shape
         )  # n-dim embedding + 1 nb of days since prev scan indicator

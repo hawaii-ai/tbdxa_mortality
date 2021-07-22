@@ -74,10 +74,10 @@ def init_combined_model(densenet_weights='imagenet', weights=None):
     """Creates combined model.
     
     Args:
-        weights: Filename.
+        weights: Filename or list of filenames.
             Deafult is None. 
-            If provided, function will attempt to initialize model weights from this file.
-            Layer names in the weights file need to match exactly. 
+            If provided, function will attempt to initialize model weights from the 'weights' file(s).
+            Layer names in the weights file(s) need to match exactly. 
             Otherwise weights will be initialized randomly.
         densenet_weights: String.
             Either of on {'imagenet', None} or filename. Deafult is 'imagenet'. 
@@ -114,7 +114,11 @@ def init_combined_model(densenet_weights='imagenet', weights=None):
 
     nn_mdl = models.Model(inputs=[inp_img, inp_meta], outputs=[comb_out])
     if weights:
-        nn_mdl.load_weights(weights, by_name=True)
+        if type(weights)==list:
+            for w in weights:
+                nn_mdl.load_weights(weights, by_name=True)
+        else:
+            nn_mdl.load_weights(weights, by_name=True)
 
     return nn_mdl
 

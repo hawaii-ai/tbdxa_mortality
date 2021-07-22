@@ -51,7 +51,7 @@ def _process_gen_items(tensor_item, mode, out_mode):
     return ds
 
 
-def _index_map(csv_file):
+def index_map(csv_file):
     df = pd.read_csv(csv_file)
 
     idx_map = {}
@@ -73,7 +73,7 @@ def write_embeddings(generator,
     emb_ds = {}
 
     for ep in range(nb_eps):
-        print(ep)
+        print('Epoch:', ep)
         data = {}
 
         for item, r_idx in tqdm(generator):
@@ -81,7 +81,7 @@ def write_embeddings(generator,
             inp, lbl = item
             ds = _process_gen_items([inp, lbl], mode, out_mode)
             emb = np.squeeze(model.predict(ds)[0])
-            sdate, part_id = index_map[r_idx]
+            part_id, sdate = index_map[r_idx]
             sample = {sdate: [emb, lbl]}
             try:
                 data[part_id][sdate] = [emb, lbl]
