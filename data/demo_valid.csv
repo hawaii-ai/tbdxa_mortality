@@ -1,0 +1,5 @@
+age,height,weight,ethnicity,sex,bmi,fasted_glucose,glucose,fasted_insulin,insulin,hemoglobin_a1c,recalib_il6,il6,short_wlk_speed,med_wlk_speed,long_wlk_speed,adl_disability_stat,stair_disability_stat,walk_disability_stat,recent_falls,num_recent_falls,grip_strength,participant_id,scan_date,10yr_death,death_bin,days_to_death,tbdxa_file
+72,165,74,0,0,27.2,65,80,10,8,4,3,6,1,1.1,1,0,0,0,0,0,18,4,01/01/2000,0,1,4000,../data/scans/sample.jpg
+73,165,75,0,0,27.5,65,80,10,8,4,2,6,1,1.1,1,0,0,0,0,0,17,4,01/01/2001,0,1,3635,../data/scans/sample.jpg
+74,165,73,0,0,26.8,65,80,10,7,5,2,6,1,1.1,1,0,0,0,0,0,17,4,01/01/2002,1,1,3270,../data/scans/sample.jpg
+76,164,72,0,0,26.8,65,80,10,7,5,2,7,1,1.1,1,0,0,0,0,0,15,4,01/01/2004,1,1,2905,../data/scans/sample.jpg
