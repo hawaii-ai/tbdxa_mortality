@@ -1,7 +1,6 @@
 # TBDXA Mortality Prediction 
-### Github repository containing all relevant code for Nature Medicine submission: DEEP LEARNING IDENTIFIES BODY COMPOSITION CHANGES OVER TIME IN TOTAL-BODY DXA IMAGING TO PREDICT ALL-CAUSE MORTALITY
-
 [![CC BY-NC-SA 4.0][cc-by-nc-sa-shield]][cc-by-nc-sa]
+### Github repository containing all relevant code for Nature Medicine submission: DEEP LEARNING IDENTIFIES BODY COMPOSITION CHANGES OVER TIME IN TOTAL-BODY DXA IMAGING TO PREDICT ALL-CAUSE MORTALITY
 
 ## Installation and system requirements:
 - Tested on CentOS Linux 7 (Core)
