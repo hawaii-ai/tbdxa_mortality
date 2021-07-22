@@ -116,7 +116,7 @@ def init_combined_model(densenet_weights='imagenet', weights=None):
     if weights:
         if type(weights)==list:
             for w in weights:
-                nn_mdl.load_weights(weights, by_name=True)
+                nn_mdl.load_weights(w, by_name=True)
         else:
             nn_mdl.load_weights(weights, by_name=True)
 
