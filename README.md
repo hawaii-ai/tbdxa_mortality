@@ -15,6 +15,7 @@ python setup.py install
 - Demo script are provided in the notebooks folder
 - A demo dataset is provided purely to validate model functionality, the dataset is not representative of the data used to train the models referenced in the manuscript
 - To validate code functionality, run sample code in notebook corresponding to desired functionality (e.g. model_loading.ipynb for an example of how to load and test pretrained models)
+- Execution time varies depending on hardware, but training and evaluation on the demo dataset should generally take no more than five minutes
 - Code to recreate figures and statistical analyses from the manuscript is provided in modules/utils/analysis_scripts.py, more extensive example notebooks for these will be provided in the future
 
 
