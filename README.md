@@ -9,6 +9,7 @@
 ```
 python setup.py install
 ```
+- Installation time > 5 minutes
 
 ## Demo
 - Demo script are provided in the notebooks folder
