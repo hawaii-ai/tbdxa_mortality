@@ -7,6 +7,7 @@ from tensorflow.keras import callbacks
 from tensorflow.keras.applications import densenet
 from tensorflow_addons import optimizers as tfa_optimizers
 
+
 def init_meta_model(weights=None):
     """Creates metadata model.
     
@@ -18,7 +19,7 @@ def init_meta_model(weights=None):
 
     Returns: Uncompiled tf.keras.models.Model instance.      
     """
-    inp_meta = Input(shape=(22, ),name='meta_0')
+    inp_meta = Input(shape=(22, ), name='meta_0')
     meta_x = Dense(units=32, activation='relu', name='meta_1')(inp_meta)
     meta_out = Dense(units=1, activation='sigmoid', name='meta_out')(meta_x)
 
@@ -27,6 +28,7 @@ def init_meta_model(weights=None):
         nn_mdl.load_weights(weights, by_name=True)
 
     return nn_mdl
+
 
 def init_image_model(densenet_weights='imagenet', weights=None):
     """Creates image model.
@@ -46,10 +48,17 @@ def init_image_model(densenet_weights='imagenet', weights=None):
 
     Returns: Uncompiled tf.keras.models.Model instance.      
     """
-    dnet = densenet.DenseNet121(include_top=False, weights=densenet_weights, input_shape=(224, 224, 3), pooling='avg')
+    dnet = densenet.DenseNet121(include_top=False,
+                                weights=densenet_weights,
+                                input_shape=(224, 224, 3),
+                                pooling='avg')
 
-    inp_img = Input(shape=(224, 224, 2,), name='img_0')
-    x_img = Conv2D(filters=3, kernel_size=(1,1), name='img_1')(inp_img)
+    inp_img = Input(shape=(
+        224,
+        224,
+        2,
+    ), name='img_0')
+    x_img = Conv2D(filters=3, kernel_size=(1, 1), name='img_1')(inp_img)
     x_img = dnet(x_img)
     x_img = Dropout(rate=0.5, name='img_3')(x_img)
     img_out = Dense(units=1, activation='sigmoid', name='img_out')(x_img)
@@ -59,6 +68,7 @@ def init_image_model(densenet_weights='imagenet', weights=None):
         nn_mdl.load_weights(weights, by_name=True)
 
     return nn_mdl
+
 
 def init_combined_model(densenet_weights='imagenet', weights=None):
     """Creates combined model.
@@ -78,13 +88,20 @@ def init_combined_model(densenet_weights='imagenet', weights=None):
 
     Returns: Uncompiled tf.keras.models.Model instance.      
     """
-    dnet = densenet.DenseNet121(include_top=False, weights=densenet_weights, input_shape=(224, 224, 3), pooling='avg')
-    
-    inp_meta = Input(shape=(22, ),name='meta_0')
+    dnet = densenet.DenseNet121(include_top=False,
+                                weights=densenet_weights,
+                                input_shape=(224, 224, 3),
+                                pooling='avg')
+
+    inp_meta = Input(shape=(22, ), name='meta_0')
     x_meta = Dense(units=32, name='meta_1')(inp_meta)
-    
-    inp_img = Input(shape=(224, 224, 2,), name='img_0')
-    x_img = Conv2D(filters=3, kernel_size=(1,1), name='img_1')(inp_img) 
+
+    inp_img = Input(shape=(
+        224,
+        224,
+        2,
+    ), name='img_0')
+    x_img = Conv2D(filters=3, kernel_size=(1, 1), name='img_1')(inp_img)
     x_img = dnet(x_img)
 
     comb_inp = Concatenate(name='comb_0')([x_img, x_meta])
@@ -101,7 +118,8 @@ def init_combined_model(densenet_weights='imagenet', weights=None):
 
     return nn_mdl
 
-def init_seq_model(weights, inp_shape=65):
+
+def init_seq_model(weights=None, inp_shape=65):
     """Creates sequence model.
     
     Args:
@@ -126,10 +144,9 @@ def init_seq_model(weights, inp_shape=65):
     x = Dense(units=64, activation='selu', name='dense4')(x)
     x = Dropout(0.5, name='dropout')(x)
     out = Dense(units=1, activation='sigmoid', name='out')(x)
-    
-    nn_mdl = Model(inputs=[inp], outputs=[out])
+
+    nn_mdl = models.Model(inputs=[inp], outputs=[out])
     if weights:
         nn_mdl.load_weights(weights, by_name=True)
-    
+
     return nn_mdl
-    
