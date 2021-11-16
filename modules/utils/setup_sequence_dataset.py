@@ -6,48 +6,47 @@ import tensorflow as tf
 from .setup_dataset import _process_aug, _process
 
 
-def _process_gen_items(tensor_item, mode, out_mode):
-
+def _process_gen_items(tensor_item, mode, out_mode, batch_size=1):
     if mode == 'train':
         if out_mode == 'meta':
-            ds = tf.data.Dataset.from_tensors(({
+            ds = tf.data.Dataset.from_tensor_slices(({
                 'meta_0':
                 tensor_item[0]['meta_0'].astype('float32')
-            }, tensor_item[1].astype('float32'))).batch(1)
+            }, tensor_item[1].astype('float32'))).batch(batch_size)
         if out_mode == 'image':
-            ds = tf.data.Dataset.from_tensors(({
+            ds = tf.data.Dataset.from_tensor_slices(({
                 'img_0':
                 tensor_item[0]['img_0'].astype('float32')
             }, tensor_item[1].astype('float32')))
-            ds = ds.map(_process_aug).batch(1)
+            ds = ds.map(_process_aug).batch(batch_size)
         if out_mode == 'combined':
-            ds = tf.data.Dataset.from_tensors(({
+            ds = tf.data.Dataset.from_tensor_slices(({
                 'meta_0':
                 tensor_item[0]['meta_0'].astype('float32'),
                 'img_0':
                 tensor_item[0]['img_0'].astype('float32')
             }, tensor_item[1].astype('float32')))
-            ds = ds.map(_process_aug).batch(1)
+            ds = ds.map(_process_aug).batch(batch_size)
     else:
         if out_mode == 'meta':
-            ds = tf.data.Dataset.from_tensors(({
+            ds = tf.data.Dataset.from_tensor_slices(({
                 'meta_0':
                 tensor_item[0]['meta_0'].astype('float32')
-            }, tensor_item[1].astype('float32'))).batch(1)
+            }, tensor_item[1].astype('float32'))).batch(batch_size)
         if out_mode == 'image':
-            ds = tf.data.Dataset.from_tensors(({
+            ds = tf.data.Dataset.from_tensor_slices(({
                 'img_0':
                 tensor_item[0]['img_0'].astype('float32')
             }, tensor_item[1].astype('float32')))
-            ds = ds.map(_process).batch(1)
+            ds = ds.map(_process).batch(batch_size)
         if out_mode == 'combined':
-            ds = tf.data.Dataset.from_tensors(({
+            ds = tf.data.Dataset.from_tensor_slices(({
                 'meta_0':
                 tensor_item[0]['meta_0'].astype('float32'),
                 'img_0':
                 tensor_item[0]['img_0'].astype('float32')
             }, tensor_item[1].astype('float32')))
-            ds = ds.map(_process).batch(1)
+            ds = ds.map(_process).batch(batch_size)
     return ds
 
 
@@ -77,16 +76,16 @@ def write_embeddings(generator,
         data = {}
 
         for item, r_idx in tqdm(generator):
-            r_idx = r_idx[0]
             inp, lbl = item
             ds = _process_gen_items([inp, lbl], mode, out_mode)
-            emb = np.squeeze(model.predict(ds)[0])
-            part_id, sdate = index_map[r_idx]
-            sample = {sdate: [emb, lbl]}
-            try:
-                data[part_id][sdate] = [emb, lbl]
-            except KeyError:
-                data[part_id] = sample
+            emb = np.squeeze(model.predict(ds))
+            for idx in range(len(r_idx)):
+                r_tmp = r_idx[idx]
+                part_id, sdate = index_map[r_tmp]
+                try:
+                    data[part_id][sdate] = [emb[idx], lbl[idx]]
+                except KeyError:
+                    data[part_id] = {sdate: [emb[idx], lbl[idx]]}
         emb_ds[ep] = data
 
     with open(save_dir, 'wb') as handle:

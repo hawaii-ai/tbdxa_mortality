@@ -12,7 +12,7 @@ AUG_PROBABILITY = 0.3
 @tf.function
 def _image_scale(im):
     """Scales image from [0,255] to [0,1] and changes dtype to tf.float32.
-    
+
     Args:
         batch: tf.Tensor.
             3D or 4D tensor. 3D for single image, 4D for batch of images.
@@ -28,7 +28,7 @@ def _image_scale(im):
 @tf.function
 def _random_apply(func, im, p, func_kwargs=None):
     """Helper function to randomly apply an augmentation function to data.
-    
+
     Args:
         func: Function.
             Ideally tf.function compatible, otherwise use tf.py_function. 
@@ -51,7 +51,7 @@ def _random_apply(func, im, p, func_kwargs=None):
 @tf.function
 def _center_crop(im):
     """ Takes center crop of image to fit 224x224 imagenet dimensions.
-    
+
     Args:
         im: tf.Tensor.
             3D or 4D tensor. 3D for single image, 4D for batch of images.
@@ -75,7 +75,7 @@ def _center_crop(im):
 @tf.function
 def _gaussian_noise(im):
     """ Applies gaussian noise to input. 
-    
+
     Args:
         im: tf.Tensor.
             3D tensor of single example.
@@ -94,7 +94,7 @@ def _gaussian_noise(im):
 @tf.function
 def _cutout_helper(im):
     """ Helper for _cutout function. Applies cutout a single time.
-    
+
     Args:
         im: tf.Tensor.
             3D tensor of single example.
@@ -119,13 +119,13 @@ def _cutout_helper(im):
     mask_height = mask_height * 2
     mask_width = mask_width * 2
 
-    return tfa.image.cutout(im, mask_size=(mask_height, mask_width))
+    return tfa.image.random_cutout(im, mask_size=(mask_height, mask_width))
 
 
 @tf.function
 def _cutout(im):
     """ Applies cutout (arxiv: 1708.04552) to images. Randomly creates up to 3 patches.
-    
+
     Args:
         im: tf.Tensor.
             3D tensor of single example.
@@ -154,7 +154,7 @@ def _cutout(im):
 @tf.function
 def _image_augment(im):
     """ Passes input through augmentation pipeline for model training.
-    
+
     Args:
         im: tf.Tensor.
             3D tensor of single example.
@@ -225,7 +225,7 @@ def get_ds_from_gen(generator,
                     batch_size=64,
                     cache_dir=''):
     """ Creates tf.data.Dataset from generator.
-    
+
     Args:
         generator: python generator.
             tf.keras.utils.Sequence or generic python generator are acceptable output batch size should be 1. 
@@ -287,9 +287,10 @@ def get_ds_from_gen(generator,
                     num_parallel_calls=TF_AUTO).batch(batch_size).prefetch(5)
     else:
         if out_mode == 'meta':
-            ds = ds.prefetch(prefetch_sample_num).batch(batch_size)
+            ds = ds.prefetch(prefetch_sample_num).batch(
+                batch_size).cache(filename=cache_dir)
         else:
             ds = ds.prefetch(prefetch_sample_num).batch(batch_size).map(
-                _process).prefetch(5)
+                _process).prefetch(5).cache(filename=cache_dir)
 
     return ds
