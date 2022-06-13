@@ -1,17 +1,42 @@
-# TBDXA Mortality Prediction 
-[![CC BY-NC-SA 4.0][cc-by-nc-sa-shield]][cc-by-nc-sa]
-### Github repository containing all relevant code for Nature Communications in Medicine submission: DEEP LEARNING IDENTIFIES BODY COMPOSITION CHANGES OVER TIME IN TOTAL-BODY DXA IMAGING TO PREDICT ALL-CAUSE MORTALITY
 
-## Installation and system requirements:
+# TBDXA Mortality Prediction 
+
+[![CC BY-NC-SA 4.0][cc-by-nc-sa-shield]][cc-by-nc-sa]
+
+---
+
+## DEEP LEARNING PREDICTS ALL-CAUSE MORTALITY FROM LONGITUDINAL TOTAL-BODY DXA IMAGING
+###### Github repository containing all relevant code for Nature Communications in Medicine submission
+
+>Mortality and body composition have an intimate but complicated relationship and many body-composition-related risk factors for mortality prediction are already well known. Understanding how body composition relates to mortality continues to be important because it presents a well-researched target for many drug and lifestyle interventions.
+The goal of this work is to improve mortality prediction by directly using DXA, a common medical imaging technology for body composition measurement, in the prediction task. We also use the history of patient records to further increase the information available to our models.
+Sophisticated machine learning models are trained to identify important features in the DXA scans and combine them with traditional mortality risk factors.
+Our findings show that, using machine learning, medical images and patient histories can be combined to better predict ten-year mortality. We also show that these models can be used to gain insights into drivers of mortality.
+
+### Architecture overview:
+
+![Architecture Diagram](images/architecture_diagram.png)
+
+### Results
+
+![AUROC Curves](images/auroc_performance.png)
+
+---
+
+## Installation and system requirements
+
 - Tested on CentOS Linux 7 (Core)
 - Python version: 3.8.10
 - To install dependencies, run:
-```
+
+```python3
 python setup.py install
 ```
+
 - Installation time < 5 minutes
 
 ## Demo
+
 - Demo script are provided in the notebooks folder
 - A demo dataset is provided purely to validate model functionality, the dataset is not representative of the data used to train/ evaluate the models referenced in the manuscript
 - To validate code functionality, run sample code in notebook corresponding to desired functionality (e.g. model_loading.ipynb for an example of how to load and test pretrained models)
