@@ -43,6 +43,19 @@ python setup.py install
 - Execution time varies depending on hardware, but training and evaluation on the demo dataset should generally take no more than five minutes
 - Code to recreate figures and statistical analyses from the manuscript is provided in modules/utils/analysis_scripts.py, more extensive example notebooks for these will be provided in the future
 
+## Citation
+```
+@article{glaser2022deep,
+    title={Deep learning predicts all-cause mortality from longitudinal total-body {DXA} imaging},
+    author={Glaser, Yannik and Shepherd, John and Leong, Lambert and Wolfgruber, Thomas and Lui, Li-Yung and  Sadowski, Peter and Cummings, Steve},
+    journal={Communications Medicine},
+    year={2022},
+    doi={10.1038/s43856-022-00166-9},
+    URL={https://doi.org/10.1038/s43856-022-00166-9},
+    volume={2},
+    number={102},
+}
+```
 
 This work is licensed under a
 [Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License][cc-by-nc-sa]. 
